@@ -1,0 +1,42 @@
+<h3>{{ _('Power Manager Settings') }}</h3>
+
+<div id="settings_plugin_powermanager" class="tab-pane   active">
+    <form class="form-horizontal">
+
+        <h4>Settings</h4>
+        <!--
+        <div class="control-group" title="Enable/Disable Plugin">
+            <div class="controls">
+                <label class="checkbox">
+                    <input type="checkbox" data-bind="checked: settings.plugins.powermanager.powerManagementEnabled"> Enabled
+                </label>
+            </div>
+        </div>
+        -->
+        <div class="control-group" title="Number of minutes of idle time before enabling power saving mode">
+            <label class="control-label" for="settings-autopowersaverTimeout">Idle Timeout (Minutes): </label>
+            <div class="controls">
+                <div class="input-append">
+                    <input type="number" step="any" min="1" class="input-mini text-right" data-bind="value: settings.plugins.powermanager.timeoutMinutes" id="settings-autopowersaverTimeout">
+                    <span class="add-on">m</span>
+                </div>
+            </div>
+        </div>
+
+        <h4>3D Printer Power Commands</h4>
+        <div class="control-group" title="Command to power off the printer connected to Octoprint">
+            <label class="control-label" for="settings-systemPowerdownCommand">Power Down</label>
+            <div class="controls">
+                <input type="text" class="input-block-level" data-bind="value: settings.plugins.powermanager.systemPowerdownCommand" id="settings-systemPowerdownCommand">
+            </div>
+        </div>
+
+        <div class="control-group" title="Command to power on the 3D printer connected to OctoPrint">
+            <label class="control-label" for="settings-systemPowerupCommand">Power On</label>
+            <div class="controls">
+                <input type="text" class="input-block-level" data-bind="value: settings.plugins.powermanager.systemPowerupCommand" id="settings-systemPowerupCommand">
+            </div>
+        </div>
+
+    </form>
+</div>

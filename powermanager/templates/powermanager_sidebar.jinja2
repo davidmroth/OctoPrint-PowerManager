@@ -1,13 +1,13 @@
 <div id="sidebar_plugin_autopowersaver" class="input-group">
     <div style="text-align:center; margin-top: 15px">
-        <button class="btn btn-primary" style="margin: 0 auto;" data-bind="click: togglePrinterPowerState, css: printerPowerStateButtonClass" title="Power On/Off - Toggle printer power">
+        <button class="btn btn-primary" style="margin: 0 auto;" data-bind="click: togglePrinterPowerState, enable: powerButtonBusy, css: printerPowerStateButtonClass" title="Power On/Off - Toggle printer power">
             <i class="icon-white"></i>
             <span data-bind="text: printerPowerStateText">  ...   </span>
         </button>
     </div>
 
     <div style="text-align:center; margin-top: 15px">
-        <button class="btn btn-primary" style="margin: 0 auto;" data-bind="click: togglePowerManagementState, css: {'btn-danger': !isPowerManagementEnabled()}" title="Toggle automatic power management">
+        <button class="btn btn-primary" style="margin: 0 auto;" data-bind="click: togglePowerManagementState, enable: powerManagerButtonBusy, css: {'btn-danger': !isPowerManagementEnabled()}" title="Toggle automatic power management">
             <i class="icon-white"></i>
             <span data-bind="text: (isPowerManagementEnabled() ? 'Power Management - Enabled' : 'Power Management - Disabled')">Power Management - Enabled</span>
         </button>

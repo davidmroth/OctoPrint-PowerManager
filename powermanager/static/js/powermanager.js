@@ -3,13 +3,37 @@ $(function() {
     function PowerManagerViewModel(parameters) {
         var self = this;
 
+        // Login state
+        self.loginState = parameters[0];
+
         // Internal State Tracking
         self.printerPowerState = false;
+        self.buttonDelay = 3000;
+        self.powerButtonBusy = ko.observable(false);
+        self.powerManagerButtonBusy = ko.observable(false);
 
         // UI State Management
         self.isPowerManagementEnabled = ko.observable();
         self.printerPowerStateText = ko.observable("...");
         self.printerPowerStateButtonClass = ko.observable("btn-primary");
+
+        self.loginState.loggedIn.subscribe(function(isLoggedIn) {
+            if (isLoggedIn) {
+                console.log("Logged in");
+                self.powerButtonBusy(true);
+                self.powerManagerButtonBusy(true);
+                self.getPrinterPowerState()
+                self.getPowerManagementState();
+                $('#sidebar_plugin_powermanager').collapse('show');
+
+            } else {
+                console.log("Not logged in");
+                self.powerButtonBusy(false);
+                self.powerManagerButtonBusy(false);
+                self.updatePrinterPowerState(99);
+                $('#sidebar_plugin_powermanager').collapse('hide');
+            }
+        });
 
         self.getPrinterPowerState = function() {
             $.ajax({
@@ -67,7 +91,48 @@ $(function() {
             self.printerPowerStateText(pstate_text)
         }
 
+        self.togglePrinterPowerState = function() {
+            self.powerButtonBusy(false);
+
+            if (!self.printerPowerState) {
+                $.ajax({
+                    url: API_BASEURL + "plugin/powermanager",
+                    type: "POST",
+                    dataType: "json",
+                    data: JSON.stringify({
+                        command: "power_on_printer"
+                    }),
+                    contentType: "application/json; charset=UTF-8"
+
+                }).done(function(data) {
+                    self.delay(function() {
+                        self.powerButtonBusy(true);
+                    });
+                });
+
+            } else {
+                $.ajax({
+                    url: API_BASEURL + "plugin/powermanager",
+                    type: "POST",
+                    dataType: "json",
+                    data: JSON.stringify({
+                        command: "power_off_printer"
+                    }),
+                    contentType: "application/json; charset=UTF-8"
+
+                }).done(function(data) {
+                    self.delay(function() {
+                        self.powerButtonBusy(true);
+                    });
+                    self.disablePopup();
+                });
+
+            }
+        }
+
         self.togglePowerManagementState = function() {
+            self.powerManagerButtonBusy(false);
+
             if (!self.isPowerManagementEnabled()) {
                 $.ajax({
                     url: API_BASEURL + "plugin/powermanager",
@@ -80,6 +145,9 @@ $(function() {
 
                 }).done(function(data) {
                     self.isPowerManagementEnabled(true);
+                    self.delay(function() {
+                        self.powerManagerButtonBusy(true);
+                    });
                 });
 
             } else {
@@ -95,39 +163,10 @@ $(function() {
                 }).done(function(data) {
                     self.disablePopup();
                     self.isPowerManagementEnabled(false);
+                    self.delay(function() {
+                        self.powerManagerButtonBusy(true);
+                    });
                 });
-            }
-        }
-
-        self.togglePrinterPowerState = function() {
-            if (!self.printerPowerState) {
-                $.ajax({
-                    url: API_BASEURL + "plugin/powermanager",
-                    type: "POST",
-                    dataType: "json",
-                    data: JSON.stringify({
-                        command: "power_on_printer"
-                    }),
-                    contentType: "application/json; charset=UTF-8"
-
-                }).done(function(data) {
-                    self.disablePopup();
-                });
-
-            } else {
-                $.ajax({
-                    url: API_BASEURL + "plugin/powermanager",
-                    type: "POST",
-                    dataType: "json",
-                    data: JSON.stringify({
-                        command: "power_off_printer"
-                    }),
-                    contentType: "application/json; charset=UTF-8"
-
-                }).done(function(data) {
-                    self.disablePopup();
-                });
-
             }
         }
 
@@ -182,14 +221,13 @@ $(function() {
             }
         }
 
+
         self.onStartupComplete = function() {
-            self.getPrinterPowerState()
-            self.getPowerManagementState();
+            self.loginState.loggedIn.valueHasMutated();
         }
 
         self.onDataUpdaterReconnect = function() {
-            self.getPrinterPowerState();
-            self.getPowerManagementState();
+            self.loginState.loggedIn.valueHasMutated();
         }
 
         self.onDataUpdaterPluginMessage = function(plugin, data) {
@@ -230,9 +268,15 @@ $(function() {
                 }
             }
         }
+
+        self.delay = function(cb) {
+            setTimeout(cb, self.buttonDelay);
+        }
     }
 
     OCTOPRINT_VIEWMODELS.push([
-        PowerManagerViewModel, [], document.getElementById("sidebar_plugin_autopowersaver")
+        PowerManagerViewModel,
+        ["loginStateViewModel"],
+        document.getElementById("sidebar_plugin_powermanager")
     ]);
 });
